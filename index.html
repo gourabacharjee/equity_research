@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Equity Research Academy — Learn Equity Research from Beginner to Advanced</title>
+  <title>EquityInsight — Learn Equity Research from Beginner to Advanced</title>
   <meta name="description" content="A comprehensive, free educational platform to learn equity research from scratch. Covers financial statements, valuation methods, ratio analysis, report writing, and AI integration. For educational purposes only.">
   <meta name="keywords" content="equity research, financial analysis, DCF, valuation, stock analysis, investment research, learn finance">
   <style>
@@ -2085,6 +2085,194 @@ code, .code {
   }
 }
 
+
+
+/* ===================================================
+   ENHANCED RESPONSIVE FINANCIAL TABLES
+   =================================================== */
+
+.table-scroll-wrapper {
+  position: relative;
+  margin: 1.5rem 0;
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+.table-swipe-hint {
+  display: none;
+  background: linear-gradient(90deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.15));
+  color: var(--accent-blue-light);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 6px 12px;
+  text-align: right;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.table-scroll-inner {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+}
+
+/* Base Comparison Table */
+.comparison-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 0;
+  font-size: 0.9rem;
+  min-width: 580px;
+}
+
+.comparison-table thead th {
+  background: #172033;
+  color: #93c5fd;
+  font-weight: 700;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  padding: 0.9rem 1rem;
+  border-bottom: 2px solid rgba(59, 130, 246, 0.3);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.comparison-table tbody tr {
+  transition: background 0.15s ease;
+}
+
+.comparison-table tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.comparison-table tbody tr:hover {
+  background: rgba(59, 130, 246, 0.08);
+}
+
+.comparison-table tbody td {
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: #cbd5e1;
+  font-size: 0.88rem;
+  vertical-align: middle;
+}
+
+.comparison-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* First Column Priority */
+.comparison-table th:first-child,
+.comparison-table td:first-child {
+  font-weight: 600;
+  color: #f8fafc;
+  min-width: 140px;
+}
+
+/* Align numeric data */
+.comparison-table td.num,
+.comparison-table th.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Mobile Specific Table Optimization */
+@media screen and (max-width: 900px) {
+  .table-swipe-hint {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .table-swipe-hint::before {
+    content: '📊 Financial Data';
+    color: var(--text-muted);
+    font-size: 0.7rem;
+  }
+
+  .table-scroll-wrapper {
+    margin: 1.2rem 0;
+    border-radius: 10px;
+  }
+
+  .comparison-table {
+    min-width: 520px;
+    font-size: 0.82rem;
+  }
+
+  .comparison-table thead th {
+    padding: 0.75rem 0.85rem;
+    font-size: 0.72rem;
+  }
+
+  .comparison-table tbody td {
+    padding: 0.7rem 0.85rem;
+    font-size: 0.82rem;
+  }
+
+  /* Pinned First Column for Unshakable Context */
+  .comparison-table th:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 4;
+    background: #111827 !important;
+    border-right: 2px solid rgba(59, 130, 246, 0.4);
+    box-shadow: 4px 0 8px rgba(0, 0, 0, 0.4);
+    min-width: 130px;
+    max-width: 150px;
+    white-space: normal;
+  }
+
+  .comparison-table td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 3;
+    background: #0f172a !important;
+    border-right: 2px solid rgba(59, 130, 246, 0.4);
+    box-shadow: 4px 0 8px rgba(0, 0, 0, 0.4);
+    color: #ffffff !important;
+    font-weight: 600;
+    min-width: 130px;
+    max-width: 150px;
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  .comparison-table tbody tr:nth-child(even) td:first-child {
+    background: #141e33 !important;
+  }
+
+  .comparison-table tbody tr:hover td:first-child {
+    background: #1e293b !important;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .comparison-table {
+    min-width: 460px;
+  }
+
+  .comparison-table th:first-child,
+  .comparison-table td:first-child {
+    min-width: 115px;
+    max-width: 130px;
+    font-size: 0.78rem;
+    padding: 0.65rem 0.7rem;
+  }
+
+  .comparison-table th,
+  .comparison-table td {
+    padding: 0.65rem 0.7rem;
+    font-size: 0.78rem;
+  }
+}
 </style>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
 </head>
@@ -2103,10 +2291,10 @@ code, .code {
     <aside class="sidebar">
       <div class="sidebar-header">
         <div class="sidebar-logo">
-          <div class="logo-icon">ER</div>
+          <div class="logo-icon">EI</div>
           <div class="logo-text">
-            Equity Research
-            <span>Academy</span>
+            EquityInsight
+            <span>Research & Learning</span>
           </div>
         </div>
       </div>
@@ -2173,7 +2361,7 @@ code, .code {
       <section class="hero" id="hero">
         <div class="hero-content">
           <div class="hero-badge">📈 Free Learning Platform</div>
-          <h1>Master Equity Research</h1>
+          <h1>Master Equity Research with EquityInsight</h1>
           <p class="hero-subtitle">
             Your complete journey from beginner to advanced equity research analyst. 
             Learn financial analysis, valuation, report writing, and how to leverage AI — 
@@ -2249,7 +2437,7 @@ code, .code {
         <h3 class="animate-on-scroll">The Two Sides of Research</h3>
         <p class="animate-on-scroll">The equity research world has two major divisions:</p>
 
-        <table class="comparison-table animate-on-scroll">
+        <div class="table-scroll-wrapper"><div class="table-swipe-hint">⇄ Swipe to view columns</div><div class="table-scroll-inner"><table class="comparison-table animate-on-scroll">
           <thead>
             <tr>
               <th>Feature</th>
@@ -2289,7 +2477,7 @@ code, .code {
               <td>Investment decisions, "skin in the game"</td>
             </tr>
           </tbody>
-        </table>
+        </table></div></div>
 
         <h3 class="animate-on-scroll">Career Path in Equity Research</h3>
         <div class="flow-diagram animate-on-scroll">
@@ -2385,7 +2573,7 @@ code, .code {
             </div>
 
             <h4>Key Line Items Explained</h4>
-            <table class="comparison-table">
+            <div class="table-scroll-wrapper"><div class="table-swipe-hint">⇄ Swipe to view columns</div><div class="table-scroll-inner"><table class="comparison-table">
               <thead>
                 <tr><th>Line Item</th><th>What It Means</th><th>Example</th></tr>
               </thead>
@@ -2426,7 +2614,7 @@ code, .code {
                   <td>₹3,00,000 − ₹1,12,500 = <strong>₹1,87,500</strong></td>
                 </tr>
               </tbody>
-            </table>
+            </table></div></div>
 
             <div class="example-box">
               <div class="example-header">🧁 Bakery Example — Full Income Statement</div>
@@ -2944,7 +3132,7 @@ code, .code {
 
         <div class="example-box animate-on-scroll">
           <div class="example-header">🔢 Comps Example — TechVista vs. Peers (Illustrative Data)</div>
-          <table class="comparison-table">
+          <div class="table-scroll-wrapper"><div class="table-swipe-hint">⇄ Swipe to view columns</div><div class="table-scroll-inner"><table class="comparison-table">
             <thead>
               <tr><th>Company</th><th>P/E</th><th>EV/EBITDA</th><th>ROE</th><th>Revenue Growth</th></tr>
             </thead>
@@ -2956,7 +3144,7 @@ code, .code {
               <tr><td style="color: var(--accent-blue-light); font-weight: 700;">Median</td><td style="color: var(--accent-blue-light);"><strong>20.5x</strong></td><td style="color: var(--accent-blue-light);"><strong>13x</strong></td><td>—</td><td>—</td></tr>
               <tr><td style="color: var(--accent-emerald-light); font-weight: 700;">TechVista (Our Target)</td><td>16x</td><td>10x</td><td>20%</td><td>14%</td></tr>
             </tbody>
-          </table>
+          </table></div></div>
           <p>
             TechVista trades at a P/E of 16x while the peer median is 20.5x. With similar growth and profitability, 
             TechVista appears <span class="highlight green">undervalued</span> relative to peers!
@@ -2966,7 +3154,7 @@ code, .code {
         <div class="divider"></div>
 
         <h3 class="animate-on-scroll">Which Method Should You Use?</h3>
-        <table class="comparison-table animate-on-scroll">
+        <div class="table-scroll-wrapper"><div class="table-swipe-hint">⇄ Swipe to view columns</div><div class="table-scroll-inner"><table class="comparison-table animate-on-scroll">
           <thead>
             <tr><th>Feature</th><th>DCF</th><th>Comparable Company</th></tr>
           </thead>
@@ -2977,7 +3165,7 @@ code, .code {
             <tr><td>Weaknesses</td><td>Very sensitive to assumptions (WACC, growth)</td><td>Depends on peer selection; market may be wrong</td></tr>
             <tr><td>Recommendation</td><td colspan="2" style="color: var(--accent-emerald-light); text-align: center;"><strong>Use BOTH for a valuation range — don't rely on just one!</strong></td></tr>
           </tbody>
-        </table>
+        </table></div></div>
       </section>
 
       <!-- ====== MODULE 5: BUILDING A REPORT ====== -->
@@ -3240,7 +3428,7 @@ code, .code {
 
         <h3 class="animate-on-scroll">Recommended AI Tools for Equity Research</h3>
 
-        <table class="comparison-table animate-on-scroll">
+        <div class="table-scroll-wrapper"><div class="table-swipe-hint">⇄ Swipe to view columns</div><div class="table-scroll-inner"><table class="comparison-table animate-on-scroll">
           <thead>
             <tr><th>Tool</th><th>Best For</th><th>Key Feature</th><th>Pricing</th></tr>
           </thead>
@@ -3282,7 +3470,7 @@ code, .code {
               <td>Free + paid</td>
             </tr>
           </tbody>
-        </table>
+        </table></div></div>
 
         <h3 class="animate-on-scroll">Sample AI Prompts for Equity Research</h3>
         <p class="animate-on-scroll">Here are ready-to-use prompts you can copy and use with any AI tool:</p>
@@ -3415,7 +3603,7 @@ Present this as a comparison table. Highlight where [Company] outperforms or und
               </div>
             </div>
             <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 1rem; margin-bottom: 0;">
-              Report Date: August 2025 (Illustrative) | Analyst: [Your Name] | For Educational Purposes Only
+              Report Date: August 2025 (Illustrative) | Analyst: Gourab Acharjee | For Educational Purposes Only
             </p>
           </div>
 
@@ -3456,7 +3644,7 @@ Present this as a comparison table. Highlight where [Company] outperforms or und
               professionals across India, US, UK, and Germany.</p>
               
               <h4>Revenue Mix by Service Line (Illustrative FY2025)</h4>
-              <table class="comparison-table">
+              <div class="table-scroll-wrapper"><div class="table-swipe-hint">⇄ Swipe to view columns</div><div class="table-scroll-inner"><table class="comparison-table">
                 <thead>
                   <tr><th>Service Line</th><th>Revenue Share</th><th>YoY Growth</th><th>Margin Profile</th></tr>
                 </thead>
@@ -3467,7 +3655,7 @@ Present this as a comparison table. Highlight where [Company] outperforms or und
                   <tr><td>Legacy Application Mgmt</td><td>15%</td><td>-5%</td><td>Low (12%)</td></tr>
                   <tr><td>Consulting & Advisory</td><td>10%</td><td>+15%</td><td>High (28%)</td></tr>
                 </tbody>
-              </table>
+              </table></div></div>
               <p><strong>Competitive Moat:</strong> TechVista has built proprietary AI toolkits and industry-specific 
               solution accelerators that reduce project delivery time by 30–40%, creating switching costs for clients.</p>
             </div>
@@ -3489,7 +3677,7 @@ Present this as a comparison table. Highlight where [Company] outperforms or und
             <div class="report-section">
               <h3>4. Financial Analysis</h3>
               <h4>Historical & Projected Financials (Illustrative Data — ₹ in Crores)</h4>
-              <table class="comparison-table">
+              <div class="table-scroll-wrapper"><div class="table-swipe-hint">⇄ Swipe to view columns</div><div class="table-scroll-inner"><table class="comparison-table">
                 <thead>
                   <tr><th>Metric</th><th>FY2023</th><th>FY2024</th><th>FY2025</th><th>FY2026E</th><th>FY2027E</th></tr>
                 </thead>
@@ -3504,7 +3692,7 @@ Present this as a comparison table. Highlight where [Company] outperforms or und
                   <tr><td>ROE</td><td>20%</td><td>22%</td><td>24%</td><td>25%</td><td>26%</td></tr>
                   <tr><td>D/E Ratio</td><td>0.15</td><td>0.12</td><td>0.10</td><td>0.08</td><td>0.06</td></tr>
                 </tbody>
-              </table>
+              </table></div></div>
               <p><em>E = Estimated/Projected. Source: Illustrative data for educational purposes.</em></p>
 
               <h4>Key Observations</h4>
@@ -3522,7 +3710,7 @@ Present this as a comparison table. Highlight where [Company] outperforms or und
               <h3>5. Valuation</h3>
               
               <h4>A. DCF Valuation (Illustrative)</h4>
-              <table class="comparison-table">
+              <div class="table-scroll-wrapper"><div class="table-swipe-hint">⇄ Swipe to view columns</div><div class="table-scroll-inner"><table class="comparison-table">
                 <thead>
                   <tr><th>Assumption</th><th>Value</th></tr>
                 </thead>
@@ -3537,10 +3725,10 @@ Present this as a comparison table. Highlight where [Company] outperforms or und
                   <tr><td>Shares Outstanding</td><td>20 Cr</td></tr>
                   <tr><td><strong>DCF Fair Value / Share</strong></td><td><strong>₹1,502</strong></td></tr>
                 </tbody>
-              </table>
+              </table></div></div>
 
               <h4>B. Comparable Company Valuation (Illustrative)</h4>
-              <table class="comparison-table">
+              <div class="table-scroll-wrapper"><div class="table-swipe-hint">⇄ Swipe to view columns</div><div class="table-scroll-inner"><table class="comparison-table">
                 <thead>
                   <tr><th>Company</th><th>P/E (FY26E)</th><th>EV/EBITDA</th><th>Rev Growth</th><th>EBITDA Margin</th></tr>
                 </thead>
@@ -3552,14 +3740,14 @@ Present this as a comparison table. Highlight where [Company] outperforms or und
                   <tr><td style="color: var(--accent-blue-light);">Median</td><td style="color: var(--accent-blue-light);"><strong>23.5x</strong></td><td style="color: var(--accent-blue-light);"><strong>16x</strong></td><td>—</td><td>—</td></tr>
                   <tr><td style="color: var(--accent-emerald-light);"><strong>TechVista</strong></td><td style="color: var(--accent-emerald-light);"><strong>12.2x</strong></td><td style="color: var(--accent-emerald-light);"><strong>8.7x</strong></td><td><strong>18%</strong></td><td><strong>20%</strong></td></tr>
                 </tbody>
-              </table>
+              </table></div></div>
               <p>At current price of ₹1,250, TechVista trades at a <span class="highlight green">significant discount</span> 
               to peer median (12.2x vs. 23.5x P/E). Applying the peer median P/E of 23.5x to TechVista's FY26E EPS of ₹102.8 
               yields an implied price of <strong>₹1,600</strong>. Even at a 20% discount to peers (to be conservative), 
               the implied price is <strong>₹1,530</strong>.</p>
 
               <h4>C. Target Price Summary</h4>
-              <table class="comparison-table">
+              <div class="table-scroll-wrapper"><div class="table-swipe-hint">⇄ Swipe to view columns</div><div class="table-scroll-inner"><table class="comparison-table">
                 <thead>
                   <tr><th>Method</th><th>Implied Value / Share</th><th>Weight</th></tr>
                 </thead>
@@ -3569,7 +3757,7 @@ Present this as a comparison table. Highlight where [Company] outperforms or und
                   <tr><td>Comps (EV/EBITDA based)</td><td>₹1,540</td><td>20%</td></tr>
                   <tr><td><strong>Blended Target Price</strong></td><td colspan="2"><strong style="color: var(--accent-emerald-light); font-size: 1.1rem;">₹1,550 (24% upside)</strong></td></tr>
                 </tbody>
-              </table>
+              </table></div></div>
             </div>
 
             <!-- Risks -->
@@ -3730,8 +3918,11 @@ Present this as a comparison table. Highlight where [Company] outperforms or und
           NASSCOM, Securities and Exchange Board of India (SEBI), U.S. Securities and Exchange Commission (SEC), 
           National Institute of Securities Markets (NISM), CFA Institute, Zerodha Varsity, Prof. Aswath Damodaran (NYU Stern).
         </div>
-        <p class="footer-copy">
-          © 2025 Equity Research Academy — An Educational Initiative | Built with ❤️ for aspiring analysts
+        <p class="footer-copy" style="font-size: 0.9rem; margin-top: 1rem; color: #94a3b8;">
+          © 2025 <strong style="color: #60a5fa;">EquityInsight</strong> — Designed & Developed with ❤️ by <strong style="color: #34d399;">Gourab Acharjee</strong>
+        </p>
+        <p style="font-size: 0.78rem; color: #64748b; margin-top: 0.3rem;">
+          An Educational Initiative for Aspiring Equity Analysts & Investors
         </p>
       </footer>
 
