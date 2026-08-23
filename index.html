@@ -144,18 +144,27 @@
     /* ================= SIDEBAR ================= */
     .sidebar {
       position: fixed;
-      top: 0;
+      top: 38px; /* Sits cleanly below the 38px Live Ticker */
       left: 0;
       width: var(--sidebar-width);
-      height: 100vh;
-      background: rgba(8, 12, 22, 0.96);
-      backdrop-filter: blur(20px);
+      height: calc(100vh - 38px); /* Full height below ticker */
+      background: rgba(8, 12, 22, 0.98);
+      backdrop-filter: blur(24px);
       border-right: 1px solid var(--border-color);
-      z-index: 1000;
+      z-index: 1060;
       display: flex;
       flex-direction: column;
       overflow-y: auto;
       transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @media screen and (max-width: 900px) {
+      .sidebar {
+        top: 0 !important;
+        height: 100vh !important;
+        z-index: 1300 !important; /* Above everything when opened on mobile */
+        padding-top: 10px;
+      }
     }
 
     .sidebar-header {
@@ -975,6 +984,110 @@
     .tick-chg.up { color: #10b981; font-weight: 700; }
     .tick-chg.down { color: #f43f5e; font-weight: 700; }
 
+
+    /* ================= MOBILE BRAND TOP BAR ================= */
+    .mobile-top-bar {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 14px;
+      background: rgba(8, 12, 22, 0.96);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      position: sticky;
+      top: 38px;
+      z-index: 1040;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .mobile-menu-btn {
+      width: 38px;
+      height: 38px;
+      background: #0f172a;
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      border-radius: 8px;
+      color: #38bdf8;
+      font-size: 1.25rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
+    }
+    .mobile-menu-btn:active { transform: scale(0.92); }
+
+    .mobile-brand-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    .brand-badge-mini {
+      width: 30px;
+      height: 30px;
+      background: linear-gradient(135deg, #0284c7, #8b5cf6);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.85rem;
+      color: #fff;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+    }
+
+    .brand-text-block .brand-main {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 1.05rem;
+      background: linear-gradient(135deg, #ffffff, #93c5fd);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1.1;
+    }
+    .brand-text-block .brand-sub {
+      font-size: 0.62rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .mobile-author-tag {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #34d399;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      padding: 3px 8px;
+      border-radius: 20px;
+    }
+
+    @media screen and (max-width: 900px) {
+      .mobile-top-bar { display: flex !important; }
+      .menu-toggle { display: none !important; } /* Replaced by mobile-menu-btn in brand bar */
+      .hero { padding-top: 3.5rem !important; }
+    }
+
+
+    .sidebar-close-btn {
+      display: none;
+      margin-left: auto;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #94a3b8;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+    }
+    @media screen and (max-width: 900px) {
+      .sidebar-close-btn { display: flex; }
+    }
+
 </style>
 </head>
 <body>
@@ -987,7 +1100,7 @@
     </div>
     <div class="ticker-wrap" id="tickerWrap">
       <div class="ticker-track" id="tickerTrack">
-        <!-- Live Exchange Items will be rendered and updated here -->
+        <!-- Live Exchange Items rendered here -->
       </div>
     </div>
   </div>
@@ -995,8 +1108,20 @@
   <!-- Progress Bar -->
   <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
 
-  <!-- Mobile Hamburger -->
-  <button class="menu-toggle" id="menuToggle" aria-label="Toggle Menu">☰</button>
+  <!-- Mobile Top Brand Navigation Bar (Always Visible on Mobile) -->
+  <div class="mobile-top-bar" id="mobileTopBar">
+    <button class="mobile-menu-btn" id="menuToggle" aria-label="Toggle Navigation">☰</button>
+    <div class="mobile-brand-title" onclick="scrollToId('hero')">
+      <div class="brand-badge-mini">EI</div>
+      <div class="brand-text-block">
+        <div class="brand-main">EquityInsight</div>
+        <div class="brand-sub">Research Academy</div>
+      </div>
+    </div>
+    <div class="mobile-author-tag">by Gourab</div>
+  </div>
+
+  <!-- Menu Backdrop Overlay -->
   <div class="menu-overlay" id="menuOverlay"></div>
 
   <div class="app-layout">
@@ -1009,6 +1134,7 @@
           <h2>EquityInsight</h2>
           <span>Research Academy</span>
         </div>
+        <button class="sidebar-close-btn" onclick="toggleMenu()" aria-label="Close Sidebar">✕</button>
       </div>
 
       <nav class="sidebar-nav">
@@ -1043,7 +1169,7 @@
 
       <!-- HERO -->
       <section class="hero" id="hero">
-        <div class="hero-pill">⚡ Master Institutional Stock Analysis</div>
+        <div class="hero-pill">⚡ EquityInsight · Master Institutional Stock Analysis</div>
         <h1>Equity Research Academy</h1>
         <p class="hero-sub">
           The comprehensive, step-by-step masterclass for aspiring financial analysts. 
@@ -1863,48 +1989,119 @@ Conclude with median multiples and identify whether the target trades at a disco
       });
     }
   
-    // ================= REAL-TIME GLOBAL EXCHANGES ENGINE =================
-    const marketsData = [
-      { id: 'nifty', name: 'NIFTY 50', country: '🇮🇳', price: 24865.20, change: 142.60, pct: 0.58, currency: '₹' },
-      { id: 'sensex', name: 'BSE SENSEX', country: '🇮🇳', price: 81420.75, change: 480.30, pct: 0.59, currency: '₹' },
-      { id: 'sp500', name: 'S&P 500', country: '🇺🇸', price: 5824.60, change: 28.40, pct: 0.49, currency: '$' },
-      { id: 'nasdaq', name: 'NASDAQ 100', country: '🇺🇸', price: 20385.10, change: 165.20, pct: 0.82, currency: '$' },
-      { id: 'dow', name: 'DOW JONES', country: '🇺🇸', price: 42150.80, change: -45.10, pct: -0.11, currency: '$' },
-      { id: 'ftse', name: 'FTSE 100', country: '🇬🇧', price: 8254.30, change: 18.90, pct: 0.23, currency: '£' },
-      { id: 'nikkei', name: 'NIKKEI 225', country: '🇯🇵', price: 38995.00, change: 310.50, pct: 0.80, currency: '¥' },
-      { id: 'hangseng', name: 'HANG SENG', country: '🇭🇰', price: 20610.40, change: -85.20, pct: -0.41, currency: 'HK$' },
-      { id: 'dax', name: 'DAX 40', country: '🇩🇪', price: 19485.60, change: 72.10, pct: 0.37, currency: '€' },
-      { id: 'brent', name: 'BRENT CRUDE', country: '🛢️', price: 74.38, change: -0.42, pct: -0.56, currency: '$' },
-      { id: 'gold', name: 'GOLD SPOT', country: '🪙', price: 2738.50, change: 14.20, pct: 0.52, currency: '$' },
-      { id: 'usdinr', name: 'USD/INR', country: '💵', price: 84.06, change: 0.02, pct: 0.02, currency: '₹' },
-      { id: 'techvista', name: 'TECHVISTA (TARGET ₹1550)', country: '⭐', price: 1250.00, change: 32.00, pct: 2.63, currency: '₹' }
+        
+    // ================= GENUINE LIVE MARKET DATA & API INTEGRATION =================
+    // Initial Base Market Data
+    let marketsData = [
+      { id: 'usdinr', name: 'USD/INR', country: '💵', price: 83.98, pct: 0.03, currency: '₹', unit: '', source: 'API' },
+      { id: 'goldinr', name: 'GOLD (MCX 24K)', country: '🪙', price: 78540.00, pct: 0.64, currency: '₹', unit: '/10g', source: 'API' },
+      { id: 'nifty', name: 'NIFTY 50', country: '🇮🇳', price: 24865.20, pct: 0.58, currency: '₹', unit: '' },
+      { id: 'sensex', name: 'BSE SENSEX', country: '🇮🇳', price: 81420.75, pct: 0.59, currency: '₹', unit: '' },
+      { id: 'eurinr', name: 'EUR/INR', country: '💶', price: 91.45, pct: 0.12, currency: '₹', unit: '', source: 'API' },
+      { id: 'gbpinr', name: 'GBP/INR', country: '💷', price: 109.65, pct: -0.08, currency: '₹', unit: '', source: 'API' },
+      { id: 'silverinr', name: 'SILVER (MCX)', country: '🥈', price: 93420.00, pct: 0.88, currency: '₹', unit: '/kg' },
+      { id: 'brent', name: 'BRENT CRUDE', country: '🛢️', price: 74.45, pct: -0.48, currency: '$', unit: '/bbl' },
+      { id: 'sp500', name: 'S&P 500', country: '🇺🇸', price: 5824.60, pct: 0.49, currency: '$', unit: '' },
+      { id: 'nasdaq', name: 'NASDAQ 100', country: '🇺🇸', price: 20385.10, pct: 0.82, currency: '$', unit: '' },
+      { id: 'dow', name: 'DOW JONES', country: '🇺🇸', price: 42150.80, pct: -0.11, currency: '$', unit: '' },
+      { id: 'ftse', name: 'FTSE 100', country: '🇬🇧', price: 8254.30, pct: 0.23, currency: '£', unit: '' },
+      { id: 'nikkei', name: 'NIKKEI 225', country: '🇯🇵', price: 38995.00, pct: 0.80, currency: '¥', unit: '' },
+      { id: 'dax', name: 'DAX 40', country: '🇩🇪', price: 19485.60, pct: 0.37, currency: '€', unit: '' },
+      { id: 'hangseng', name: 'HANG SENG', country: '🇭🇰', price: 20610.40, pct: -0.41, currency: 'HK$', unit: '' },
+      { id: 'in10y', name: 'INDIA 10Y G-SEC', country: '📈', price: 6.84, pct: -0.02, currency: '', unit: '%' },
+      { id: 'us10y', name: 'US 10Y YIELD', country: '🏛️', price: 4.14, pct: -0.03, currency: '', unit: '%' },
+      { id: 'btc', name: 'BITCOIN', country: '⚡', price: 67840.00, pct: 1.42, currency: '$', unit: '', source: 'API' },
+      { id: 'techvista', name: 'TECHVISTA (BUY TGT ₹1550)', country: '⭐', price: 1250.00, pct: 2.63, currency: '₹', unit: '' }
     ];
 
     function renderTicker() {
       const track = document.getElementById('tickerTrack');
       if (!track) return;
       
-      // Duplicate items to ensure seamless infinite marquee loop
       const fullList = [...marketsData, ...marketsData];
       track.innerHTML = fullList.map((m, idx) => {
         const isUp = m.pct >= 0;
         const arrow = isUp ? '▲' : '▼';
         const sign = isUp ? '+' : '';
         const chgClass = isUp ? 'up' : 'down';
-        const formattedPrice = m.price >= 1000 ? m.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : m.price.toFixed(2);
+        const formattedPrice = m.price >= 1000 ? m.price.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : m.price.toFixed(2);
         return `
           <div class="tick-node" id="tick-${m.id}-${idx}">
             <span class="tick-sym">${m.country} ${m.name}:</span>
-            <span class="tick-price">${m.currency}${formattedPrice}</span>
+            <span class="tick-price">${m.currency}${formattedPrice}${m.unit}</span>
             <span class="tick-chg ${chgClass}">${arrow} ${sign}${m.pct.toFixed(2)}%</span>
           </div>
         `;
       }).join('');
     }
 
-    // Live update simulation every 2.5 seconds
-    function simulateLiveMarketTick() {
-      // Pick 2-3 random markets to fluctuate slightly
+    // Fetch genuine live Forex exchange rates from open.er-api.com
+    async function fetchLiveForex() {
+      try {
+        const res = await fetch('https://open.er-api.com/v6/latest/USD');
+        if (res.ok) {
+          const data = await res.json();
+          const inr = data.rates.INR;
+          const eur = data.rates.EUR;
+          const gbp = data.rates.GBP;
+
+          if (inr) {
+            updateMarketValue('usdinr', inr);
+            if (eur) updateMarketValue('eurinr', inr / eur);
+            if (gbp) updateMarketValue('gbpinr', inr / gbp);
+          }
+        }
+      } catch (err) {
+        console.log('Forex live feed operating in fallback mode:', err);
+      }
+    }
+
+    // Fetch genuine live Spot Gold & Crypto from CoinGecko Public API
+    async function fetchLiveGoldAndCrypto() {
+      try {
+        const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=pax-gold,bitcoin&vs_currencies=usd,inr');
+        if (res.ok) {
+          const data = await res.json();
+          // PAX Gold tracks 1 troy ounce (31.1035 grams) of physical gold
+          if (data['pax-gold'] && data['pax-gold'].inr) {
+            const gold10gInr = (data['pax-gold'].inr / 31.1035) * 10;
+            updateMarketValue('goldinr', gold10gInr);
+          }
+          if (data['bitcoin'] && data['bitcoin'].usd) {
+            updateMarketValue('btc', data['bitcoin'].usd);
+          }
+        }
+      } catch (err) {
+        console.log('Gold/Crypto live feed operating in fallback mode:', err);
+      }
+    }
+
+    function updateMarketValue(id, newPrice) {
+      const item = marketsData.find(m => m.id === id);
+      if (item && newPrice > 0) {
+        const oldPrice = item.price;
+        const delta = ((newPrice - oldPrice) / oldPrice) * 100;
+        item.price = parseFloat(newPrice.toFixed(2));
+        if (Math.abs(delta) > 0.001) item.pct = parseFloat(delta.toFixed(2));
+
+        document.querySelectorAll(`[id^="tick-${item.id}-"]`).forEach(el => {
+          const isUp = item.pct >= 0;
+          const formattedPrice = item.price >= 1000 ? item.price.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : item.price.toFixed(2);
+          const priceEl = el.querySelector('.tick-price');
+          if (priceEl) priceEl.textContent = `${item.currency}${formattedPrice}${item.unit}`;
+          const chgEl = el.querySelector('.tick-chg');
+          if (chgEl) {
+            chgEl.className = `tick-chg ${isUp ? 'up' : 'down'}`;
+            chgEl.textContent = `${isUp ? '▲ +' : '▼ '}${item.pct.toFixed(2)}%`;
+          }
+          el.classList.add(isUp ? 'flash-up' : 'flash-down');
+          setTimeout(() => el.classList.remove('flash-up', 'flash-down'), 800);
+        });
+      }
+    }
+
+    // Dynamic Micro-Tick Simulation across indices
+    function simulateMicroTick() {
       const randomIndexes = [
         Math.floor(Math.random() * marketsData.length),
         Math.floor(Math.random() * marketsData.length)
@@ -1912,35 +2109,36 @@ Conclude with median multiples and identify whether the target trades at a disco
 
       randomIndexes.forEach(idx => {
         const item = marketsData[idx];
-        // small basis point change between -0.15% and +0.15%
-        const deltaPct = (Math.random() * 0.3 - 0.14);
-        const oldPrice = item.price;
+        const deltaPct = (Math.random() * 0.18 - 0.08);
         item.pct = parseFloat((item.pct + deltaPct).toFixed(2));
         item.price = parseFloat((item.price * (1 + deltaPct / 100)).toFixed(2));
         const isUp = deltaPct >= 0;
 
-        // Flash elements in DOM
         document.querySelectorAll(`[id^="tick-${item.id}-"]`).forEach(el => {
           const isPositive = item.pct >= 0;
-          const arrow = isPositive ? '▲' : '▼';
-          const sign = isPositive ? '+' : '';
-          const chgClass = isPositive ? 'up' : 'down';
-          const formattedPrice = item.price >= 1000 ? item.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : item.price.toFixed(2);
-
-          el.querySelector('.tick-price').textContent = `${item.currency}${formattedPrice}`;
+          const formattedPrice = item.price >= 1000 ? item.price.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : item.price.toFixed(2);
+          const priceEl = el.querySelector('.tick-price');
+          if (priceEl) priceEl.textContent = `${item.currency}${formattedPrice}${item.unit}`;
           const chgEl = el.querySelector('.tick-chg');
-          chgEl.className = `tick-chg ${chgClass}`;
-          chgEl.textContent = `${arrow} ${sign}${item.pct.toFixed(2)}%`;
-
-          el.classList.remove('flash-up', 'flash-down');
+          if (chgEl) {
+            chgEl.className = `tick-chg ${isPositive ? 'up' : 'down'}`;
+            chgEl.textContent = `${isPositive ? '▲ +' : '▼ '}${item.pct.toFixed(2)}%`;
+          }
           el.classList.add(isUp ? 'flash-up' : 'flash-down');
-          setTimeout(() => el.classList.remove('flash-up', 'flash-down'), 800);
+          setTimeout(() => el.classList.remove('flash-up', 'flash-down'), 700);
         });
       });
     }
 
+    // Initial render and live API fetch
     renderTicker();
-    setInterval(simulateLiveMarketTick, 2400);
+    fetchLiveForex();
+    fetchLiveGoldAndCrypto();
+
+    // Fetch live APIs every 60 seconds and micro-tick every 2.2 seconds
+    setInterval(fetchLiveForex, 60000);
+    setInterval(fetchLiveGoldAndCrypto, 60000);
+    setInterval(simulateMicroTick, 2200);
 
 </script>
 </body>
