@@ -256,24 +256,31 @@
       background: rgba(0, 0, 0, 0.2);
     }
 
-    /* Mobile Menu Toggle */
+    /* Mobile Menu Toggle (Left Positioned) */
     .menu-toggle {
       display: none;
       position: fixed;
-      top: 0.9rem;
-      right: 1rem;
-      z-index: 1200;
-      width: 44px;
-      height: 44px;
-      background: #0f172a;
-      border: 1px solid rgba(255, 255, 255, 0.15);
+      top: 46px;
+      left: 1rem;
+      right: auto;
+      z-index: 1100;
+      width: 42px;
+      height: 42px;
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(56, 189, 248, 0.35);
       border-radius: 10px;
-      color: #fff;
-      font-size: 1.3rem;
+      color: #38bdf8;
+      font-size: 1.25rem;
       cursor: pointer;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), 0 0 10px rgba(56, 189, 248, 0.2);
+      transition: all 0.2s ease;
+    }
+    .menu-toggle:active {
+      transform: scale(0.92);
+      background: rgba(56, 189, 248, 0.2);
     }
     .menu-overlay {
       display: none;
@@ -806,7 +813,7 @@
        MOBILE & RESPONSIVE BREAKPOINTS (<= 900px)
        ========================================================= */
     @media screen and (max-width: 900px) {
-      .menu-toggle { display: flex; }
+      .menu-toggle { display: flex !important; left: 1rem !important; right: auto !important; top: 46px !important; }
       
       .sidebar {
         transform: translateX(-100%);
