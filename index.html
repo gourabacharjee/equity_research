@@ -1095,6 +1095,7 @@
       <nav class="sidebar-nav">
         <div class="nav-label">Curriculum</div>
         <a class="nav-link active" data-target="hero">🏠 Home Overview</a>
+        <a class="nav-link" data-target="mod-news">📰 Market News <span class="nav-tag rep">News</span></a>
         
         <div class="nav-label">Beginner Track</div>
         <a class="nav-link" data-target="mod-intro">📖 1. What is Equity Research <span class="nav-tag beg">Intro</span></a>
@@ -1151,6 +1152,30 @@
           <div class="stat-card">
             <div class="stat-val">100%</div>
             <div class="stat-lbl">Free Access</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= MARKET NEWS ================= -->
+      <section class="section" id="mod-news">
+        <div class="section-badge rep">Market Updates</div>
+        <h2>📰 Market News</h2>
+        <p>
+          Dedicated section for latest market intelligence and news updates.
+        </p>
+
+        <!-- Category Tabs -->
+        <div style="display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px;">
+          <button class="btn btn-primary" onclick="loadNewsCategory('india')" id="tab-india">India Market News</button>
+          <button class="btn btn-secondary" onclick="loadNewsCategory('global')" id="tab-global">Global Market News</button>
+          <button class="btn btn-secondary" onclick="loadNewsCategory('nifty')" id="tab-nifty">Nifty & Sensex Updates</button>
+          <button class="btn btn-secondary" onclick="loadNewsCategory('stocks')" id="tab-stocks">Stock-specific News</button>
+          <button class="btn btn-secondary" onclick="loadNewsCategory('sector')" id="tab-sector">Sector News</button>
+        </div>
+
+        <div class="cards-grid cols-3" id="dynamic-news-grid">
+          <div style="grid-column: span 3; text-align: center; padding: 2rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace;">
+            <span style="display:inline-block; animation: pulseLive 1.5s infinite;">⏳ Fetching latest genuine market intelligence...</span>
           </div>
         </div>
       </section>
@@ -1996,6 +2021,7 @@ Conclude with median multiples and identify whether the target trades at a disco
             <span class="tick-sym">${m.flag} ${m.name}:</span>
             <span class="tick-price">${m.currency}${formattedPrice}${m.unit}</span>
             <span class="tick-chg ${chgClass}">${arrow} ${sign}${m.pct.toFixed(2)}%</span>
+            <span style="font-size: 0.65rem; color: #94a3b8; margin-left: 6px; font-weight: 500;">(${m.source})</span>
           </div>
         `;
       }).join('');
@@ -2081,25 +2107,89 @@ Conclude with median multiples and identify whether the target trades at a disco
       }
     }
 
-    // 3. Realistic Dynamic Micro-Tick Fluctuations (for active market feel)
-    function runLiveMicroFluctuations() {
-      const idx = Math.floor(Math.random() * liveMarkets.length);
-      const item = liveMarkets[idx];
-      const deltaPct = (Math.random() * 0.16 - 0.07);
-      item.pct = parseFloat((item.pct + deltaPct).toFixed(2));
-      item.price = parseFloat((item.price * (1 + deltaPct / 100)).toFixed(2));
-      updateMarketItem(item.id, item.price, item.pct);
+    // 3. Fetch 100% Accurate Live Data from our Local Node.js Backend Proxy
+    async function fetchLiveBackendData() {
+      try {
+        const response = await fetch('http://localhost:3000/api/ticker');
+        if (response.ok) {
+          const data = await response.json();
+          // Update the UI with exact data from Yahoo Finance
+          for (const [id, info] of Object.entries(data)) {
+            updateMarketItem(id, info.price, info.pct);
+          }
+        }
+      } catch (e) {
+        console.log('Backend proxy not running. Please run "node server.js".');
+      }
     }
 
-    // Initialize UI and genuine API calls
+    // 4. Fetch Authentic Market News directly from Node.js Aggregator Proxy
+    async function loadNewsCategory(category) {
+      ['india', 'global', 'nifty', 'stocks', 'sector'].forEach(cat => {
+        const btn = document.getElementById('tab-' + cat);
+        if (btn) btn.className = (cat === category) ? 'btn btn-primary' : 'btn btn-secondary';
+      });
+
+      const grid = document.getElementById('dynamic-news-grid');
+      if(!grid) return;
+      grid.innerHTML = '<div style="grid-column: span 3; text-align: center; padding: 2rem; color: var(--text-muted);"><span style="display:inline-block; animation: pulseLive 1.5s infinite;">⏳ Fetching genuine ' + category + ' news...</span></div>';
+
+      try {
+        const response = await fetch(`http://localhost:3000/api/news?category=${category}`);
+        if (response.ok) {
+          const data = await response.json();
+          const items = data.items;
+          
+          if (items.length === 0) {
+              grid.innerHTML = '<div style="grid-column: span 3; text-align: center; color: var(--text-muted);">No news found for this category right now.</div>';
+              return;
+          }
+          
+          grid.innerHTML = items.map(item => {
+            const pubDate = new Date(item.pubDate).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', hour12: true, month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+            
+            // Format industry tag beautifully
+            const industryTag = item.industry ? `<span style="background: rgba(56, 189, 248, 0.15); color: var(--blue); padding: 2px 8px; border-radius: 4px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase;">${item.industry}</span>` : '';
+            
+            return `
+              <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                  <div style="margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+                    ${industryTag}
+                  </div>
+                  <h3 style="font-size: 1.1rem; line-height: 1.4; margin-bottom: 10px;">
+                    <a href="${item.link}" target="_blank" style="color: inherit; text-decoration: none;">${item.title}</a>
+                  </h3>
+                  <p style="font-size: 0.85rem; color: var(--text-muted); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+                    ${item.description.replace(/<[^>]*>?/gm, '').substring(0, 120)}...
+                  </p>
+                </div>
+                <div style="margin-top: 15px; font-size: 0.7rem; color: #94a3b8; display: flex; justify-content: space-between;">
+                  <span style="font-weight: 700;">Source: ${item.source}</span>
+                  <span>${pubDate}</span>
+                </div>
+              </div>
+            `;
+          }).join('');
+        } else {
+          grid.innerHTML = '<div style="grid-column: span 3; text-align: center; color: var(--red);">Backend API Error fetching news data. Is server.js running?</div>';
+        }
+      } catch (e) {
+        grid.innerHTML = '<div style="grid-column: span 3; text-align: center; color: var(--red);">Failed to connect to genuine source. Ensure backend is running.</div>';
+      }
+    }
+
+    // Initialize UI and API calls
     renderTickerUI();
     fetchLiveForexData();
     fetchLiveBullionData();
+    fetchLiveBackendData(); // Initial backend fetch
+    setTimeout(() => loadNewsCategory('india'), 1000); // Initial news fetch
 
-    // Re-fetch genuine live API data every 45 seconds & micro-tick every 2.2s
+    // Re-fetch data on intervals
     setInterval(fetchLiveForexData, 45000);
     setInterval(fetchLiveBullionData, 45000);
-    setInterval(runLiveMicroFluctuations, 2200);
+    setInterval(fetchLiveBackendData, 2000); // Fetch highly accurate data every 2s from backend
 
 </script>
 </body>
