@@ -5,9 +5,14 @@ const Parser = require('rss-parser');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const parser = new Parser();
+// Configure parser to look for media:content and enclosure for images
+const parser = new Parser({
+    customFields: {
+        item: ['media:content', 'enclosure', 'image']
+    }
+});
 
-app.use(cors()); // Allow all origins so frontend can fetch
+app.use(cors());
 
 // 1. TICKER API
 const symbolMap = {
@@ -75,6 +80,23 @@ const RSS_FEEDS = {
     ]
 };
 
+// Helper to extract image URL from RSS item
+function extractImage(item) {
+    if (item.enclosure && item.enclosure.url) {
+        return item.enclosure.url;
+    }
+    if (item['media:content'] && item['media:content'].$ && item['media:content'].$.url) {
+        return item['media:content'].$.url;
+    }
+    // Fallback: try to regex image from content HTML
+    const content = item.content || item.contentSnippet || '';
+    const imgMatch = content.match(/<img[^>]+src="([^">]+)"/);
+    if (imgMatch) {
+        return imgMatch[1];
+    }
+    return null;
+}
+
 app.get('/api/news', async (req, res) => {
     const category = req.query.category || 'india';
     const feeds = RSS_FEEDS[category] || RSS_FEEDS['india'];
@@ -90,11 +112,12 @@ app.get('/api/news', async (req, res) => {
                     description: item.contentSnippet || item.content || '',
                     pubDate: item.pubDate,
                     source: feed.source,
-                    industry: feed.industry || 'Market News'
+                    industry: feed.industry || 'Market News',
+                    image: extractImage(item) // Extract the image for the frontend
                 }));
                 allNews = allNews.concat(items);
             } catch (e) {
-                console.error(`Failed to parse feed: ${feed.url}`);
+                console.error('Failed to parse feed: ' + feed.url);
             }
         }
         
@@ -109,6 +132,7 @@ app.get('/api/news', async (req, res) => {
     }
 });
 
-app.listen(PORT, () => {
-    console.log(`Live Market Data Backend running on http://localhost:${PORT}`);
+// Listen on all network interfaces (0.0.0.0) to allow mobile testing over local wifi
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Live Market Data Backend running on http://0.0.0.0:${PORT}`);
 });

@@ -2110,7 +2110,8 @@ Conclude with median multiples and identify whether the target trades at a disco
     // 3. Fetch 100% Accurate Live Data from our Local Node.js Backend Proxy
     async function fetchLiveBackendData() {
       try {
-        const response = await fetch('http://localhost:3000/api/ticker');
+        const backendHost = (window.location.hostname && window.location.hostname !== '') ? window.location.hostname : 'localhost';
+        const response = await fetch(`http://${backendHost}:3000/api/ticker`);
         if (response.ok) {
           const data = await response.json();
           // Update the UI with exact data from Yahoo Finance
@@ -2135,7 +2136,11 @@ Conclude with median multiples and identify whether the target trades at a disco
       grid.innerHTML = '<div style="grid-column: span 3; text-align: center; padding: 2rem; color: var(--text-muted);"><span style="display:inline-block; animation: pulseLive 1.5s infinite;">⏳ Fetching genuine ' + category + ' news...</span></div>';
 
       try {
-        const response = await fetch(`http://localhost:3000/api/news?category=${category}`);
+        // Automatically determine backend IP for mobile local network testing
+        const backendHost = (window.location.hostname && window.location.hostname !== '') ? window.location.hostname : 'localhost';
+        const backendUrl = `http://${backendHost}:3000/api/news?category=${category}`;
+        
+        const response = await fetch(backendUrl);
         if (response.ok) {
           const data = await response.json();
           const items = data.items;
@@ -2148,7 +2153,6 @@ Conclude with median multiples and identify whether the target trades at a disco
           grid.innerHTML = items.map(item => {
             const pubDate = new Date(item.pubDate).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', hour12: true, month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
             
-            // Format industry tag beautifully
             const industryTag = item.industry ? `<span style="background: rgba(56, 189, 248, 0.15); color: var(--blue); padding: 2px 8px; border-radius: 4px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase;">${item.industry}</span>` : '';
             
             return `
@@ -2164,7 +2168,7 @@ Conclude with median multiples and identify whether the target trades at a disco
                     ${item.description.replace(/<[^>]*>?/gm, '').substring(0, 120)}...
                   </p>
                 </div>
-                <div style="margin-top: 15px; font-size: 0.7rem; color: #94a3b8; display: flex; justify-content: space-between;">
+                <div style="margin-top: 15px; font-size: 0.7rem; color: #94a3b8; display: flex; justify-content: space-between; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 10px;">
                   <span style="font-weight: 700;">Source: ${item.source}</span>
                   <span>${pubDate}</span>
                 </div>
