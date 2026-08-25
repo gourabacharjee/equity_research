@@ -2123,7 +2123,31 @@ Conclude with median multiples and identify whether the target trades at a disco
       }
     }
 
-    // 4. Fetch Authentic Market News directly from Node.js Aggregator Proxy
+    // 4. Fetch Authentic Market News directly from highly reliable RSS proxies
+    const RSS_FEEDS = {
+        'india': [
+            { url: 'https://economictimes.indiatimes.com/markets/rssfeeds/1977021501.cms', source: 'The Economic Times' },
+            { url: 'https://www.business-standard.com/rss/markets-106.rss', source: 'Business Standard' }
+        ],
+        'global': [
+            { url: 'https://economictimes.indiatimes.com/markets/global-markets/rssfeeds/302302302.cms', source: 'The Economic Times Global' },
+            { url: 'https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=10000664', source: 'CNBC Finance' }
+        ],
+        'nifty': [
+            { url: 'https://economictimes.indiatimes.com/markets/stocks/news/rssfeeds/2146842.cms', source: 'ET Stocks' }
+        ],
+        'stocks': [
+            { url: 'https://economictimes.indiatimes.com/markets/stocks/news/rssfeeds/2146842.cms', source: 'ET Stocks' },
+            { url: 'https://www.business-standard.com/rss/companies-101.rss', source: 'Business Standard' }
+        ],
+        'sector': [
+            { url: 'https://economictimes.indiatimes.com/industry/auto/rssfeeds/13357555.cms', source: 'ET Auto', industry: 'Automobile' },
+            { url: 'https://economictimes.indiatimes.com/industry/energy/rssfeeds/13357490.cms', source: 'ET Energy', industry: 'Energy & Power' },
+            { url: 'https://economictimes.indiatimes.com/industry/banking/finance/banking/rssfeeds/13358259.cms', source: 'ET Banking', industry: 'Banking & Finance' },
+            { url: 'https://economictimes.indiatimes.com/industry/tech/information-tech/rssfeeds/13357270.cms', source: 'ET Tech', industry: 'Information Technology' }
+        ]
+    };
+
     async function loadNewsCategory(category) {
       ['india', 'global', 'nifty', 'stocks', 'sector'].forEach(cat => {
         const btn = document.getElementById('tab-' + cat);
@@ -2135,48 +2159,64 @@ Conclude with median multiples and identify whether the target trades at a disco
       grid.innerHTML = '<div style="grid-column: span 3; text-align: center; padding: 2rem; color: var(--text-muted);"><span style="display:inline-block; animation: pulseLive 1.5s infinite;">⏳ Fetching genuine ' + category + ' news...</span></div>';
 
       try {
-        const backendUrl = `https://equity-research-pogf.onrender.com/api/news?category=${category}`;
+        const feeds = RSS_FEEDS[category];
+        let allItems = [];
         
-        const response = await fetch(backendUrl);
-        if (response.ok) {
-          const data = await response.json();
-          const items = data.items;
+        for (const feed of feeds) {
+            try {
+                const response = await fetch(\`https://api.rss2json.com/v1/api.json?rss_url=\${encodeURIComponent(feed.url)}\`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.items) {
+                        const items = data.items.slice(0, 5).map(item => ({
+                            title: item.title,
+                            link: item.link,
+                            description: item.description,
+                            pubDate: item.pubDate,
+                            source: feed.source,
+                            industry: feed.industry
+                        }));
+                        allItems = allItems.concat(items);
+                    }
+                }
+            } catch (e) { console.log('Feed failed', feed.url); }
+        }
+        
+        allItems.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+        const items = allItems.slice(0, 8);
           
-          if (items.length === 0) {
-              grid.innerHTML = '<div style="grid-column: span 3; text-align: center; color: var(--text-muted);">No news found for this category right now.</div>';
-              return;
-          }
+        if (items.length === 0) {
+            grid.innerHTML = '<div style="grid-column: span 3; text-align: center; color: var(--text-muted);">No news found for this category right now.</div>';
+            return;
+        }
           
-          grid.innerHTML = items.map(item => {
+        grid.innerHTML = items.map(item => {
             const pubDate = new Date(item.pubDate).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', hour12: true, month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
             
-            const industryTag = item.industry ? `<span style="background: rgba(56, 189, 248, 0.15); color: var(--blue); padding: 2px 8px; border-radius: 4px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase;">${item.industry}</span>` : '';
+            const industryTag = item.industry ? \`<span style="background: rgba(56, 189, 248, 0.15); color: var(--blue); padding: 2px 8px; border-radius: 4px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase;">\${item.industry}</span>\` : '';
             
-            return `
+            return \`
               <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
                 <div>
                   <div style="margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
-                    ${industryTag}
+                    \${industryTag}
                   </div>
                   <h3 style="font-size: 1.1rem; line-height: 1.4; margin-bottom: 10px;">
-                    <a href="${item.link}" target="_blank" style="color: inherit; text-decoration: none;">${item.title}</a>
+                    <a href="\${item.link}" target="_blank" style="color: inherit; text-decoration: none;">\${item.title}</a>
                   </h3>
                   <p style="font-size: 0.85rem; color: var(--text-muted); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
-                    ${item.description.replace(/<[^>]*>?/gm, '').substring(0, 120)}...
+                    \${item.description.replace(/<[^>]*>?/gm, '').substring(0, 120)}...
                   </p>
                 </div>
                 <div style="margin-top: 15px; font-size: 0.7rem; color: #94a3b8; display: flex; justify-content: space-between; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 10px;">
-                  <span style="font-weight: 700;">Source: ${item.source}</span>
-                  <span>${pubDate}</span>
+                  <span style="font-weight: 700;">Source: \${item.source}</span>
+                  <span>\${pubDate}</span>
                 </div>
               </div>
-            `;
-          }).join('');
-        } else {
-          grid.innerHTML = '<div style="grid-column: span 3; text-align: center; color: var(--red);">Backend API Error fetching news data. Is server.js running?</div>';
-        }
+            \`;
+        }).join('');
       } catch (e) {
-        grid.innerHTML = '<div style="grid-column: span 3; text-align: center; color: var(--red);">Failed to connect to genuine source. Ensure backend is running.</div>';
+        grid.innerHTML = '<div style="grid-column: span 3; text-align: center; color: var(--red);">Failed to connect to genuine source.</div>';
       }
     }
 
