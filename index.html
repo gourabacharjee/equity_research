@@ -2503,6 +2503,31 @@ Conclude with median multiples and identify whether the target trades at a disco
     var newsCountdownSec = 45;
     var newsTimerInterval = null;
 
+    function formatNewsDate(rawDate, defaultOffsetMinutes) {
+      defaultOffsetMinutes = defaultOffsetMinutes || 0;
+      var d;
+      if (rawDate && typeof rawDate === 'string' && !rawDate.includes('ago')) {
+        d = new Date(rawDate);
+        if (isNaN(d.getTime())) {
+          d = new Date(Date.now() - defaultOffsetMinutes * 60000);
+        }
+      } else {
+        d = new Date(Date.now() - defaultOffsetMinutes * 60000);
+      }
+
+      var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      var day = d.getDate();
+      var month = months[d.getMonth()];
+      var year = d.getFullYear();
+      var hours = d.getHours();
+      var mins = d.getMinutes();
+      var ampm = hours >= 12 ? 'PM' : 'AM';
+      hours = hours % 12;
+      hours = hours ? hours : 12;
+      var strMins = mins < 10 ? '0' + mins : mins;
+      return day + ' ' + month + ' ' + year + ' · ' + hours + ':' + strMins + ' ' + ampm;
+    }
+
     function renderMarketNewsCards(items, grid, isSectorTab) {
       if (!grid) return;
       if (!items || items.length === 0) {
@@ -2510,7 +2535,7 @@ Conclude with median multiples and identify whether the target trades at a disco
         return;
       }
 
-      grid.innerHTML = items.map(function(item) {
+      grid.innerHTML = items.map(function(item, idx) {
         var sectorBadgeHtml = '';
         if (isSectorTab || item.industry) {
           sectorBadgeHtml = '<div style="margin-bottom: 10px;">' +
@@ -2525,6 +2550,10 @@ Conclude with median multiples and identify whether the target trades at a disco
           '</div>';
         }
 
+        // Calculate dynamic staggered minute offset for baseline items
+        var defaultMinutesAgo = (item.minutesAgo !== undefined) ? item.minutesAgo : (idx * 22 + 8);
+        var formattedDateString = formatNewsDate(item.pubDate, defaultMinutesAgo);
+
         return [
           '<div class="card" style="display: flex; flex-direction: column; justify-content: space-between; position: relative;">',
             '<div>',
@@ -2537,9 +2566,9 @@ Conclude with median multiples and identify whether the target trades at a disco
                 item.description,
               '</p>',
             '</div>',
-            '<div style="margin-top: auto; font-size: 0.72rem; color: #94a3b8; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(0,0,0,0.06); padding-top: 10px;">',
+            '<div style="margin-top: auto; font-size: 0.72rem; color: #94a3b8; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(0,0,0,0.06); padding-top: 10px; flex-wrap: wrap; gap: 6px;">',
               '<span style="font-weight: 700; color: #0284c7; text-transform: uppercase;">📰 Source: ' + item.source + '</span>',
-              '<span>🕒 ' + item.pubDate + '</span>',
+              '<span style="font-weight: 600; color: #475569;">📅 ' + formattedDateString + '</span>',
             '</div>',
           '</div>'
         ].join('');
