@@ -8,7 +8,7 @@ const newJsContent = `// 4. Fetch Authentic Market News directly from Node.js Ag
     async function loadNewsCategory(category) {
       ['india', 'global', 'nifty', 'stocks', 'sector'].forEach(cat => {
         const btn = document.getElementById('tab-' + cat);
-        if (btn) btn.className = (cat === category) ? 'btn btn-primary' : 'btn btn-secondary';
+        if (btn) btn.className = (cat === category) ? 'news-tab-btn active' : 'news-tab-btn';
       });
 
       const grid = document.getElementById('dynamic-news-grid');
