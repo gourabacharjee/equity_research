@@ -1334,19 +1334,16 @@
         <!-- News Control Toolbar & Category Tabs -->
         <div class="news-control-bar">
           <div class="news-tabs-wrap">
-            <button class="news-tab-btn active" onclick="switchMarketCategory('india')" id="tab-india">🇮🇳 Indian Market News</button>
-            <button class="news-tab-btn" onclick="switchMarketCategory('global')" id="tab-global">🌐 Global Market News</button>
-            <button class="news-tab-btn" onclick="switchMarketCategory('nifty')" id="tab-nifty">📊 Nifty & Sensex Updates</button>
-            <button class="news-tab-btn" onclick="switchMarketCategory('stocks')" id="tab-stocks">🏢 Stock-Specific News</button>
-            <button class="news-tab-btn" onclick="switchMarketCategory('sector')" id="tab-sector">⚡ Sector News</button>
+            <button class="news-tab-btn active" onclick="switchMarketCategory('india', true)" id="tab-india">🇮🇳 Indian Market News</button>
+            <button class="news-tab-btn" onclick="switchMarketCategory('global', true)" id="tab-global">🌐 Global Market News</button>
+            <button class="news-tab-btn" onclick="switchMarketCategory('nifty', true)" id="tab-nifty">📊 Nifty & Sensex Updates</button>
+            <button class="news-tab-btn" onclick="switchMarketCategory('stocks', true)" id="tab-stocks">🏢 Stock-Specific News</button>
+            <button class="news-tab-btn" onclick="switchMarketCategory('sector', true)" id="tab-sector">⚡ Sector News</button>
           </div>
 
           <div class="news-meta-toolbar">
             <span id="news-last-updated" style="color: var(--text-muted); font-size: 0.75rem; font-weight: 600;">
               🟢 Updated: Fetching...
-            </span>
-            <span style="font-size: 0.75rem; background: rgba(56,189,248,0.1); color: var(--blue); padding: 4px 10px; border-radius: 20px; font-weight: 600;">
-              ⏱️ Refreshing in <b id="news-countdown-sec">45</b>s
             </span>
             <button class="btn btn-secondary" id="btn-manual-refresh" onclick="triggerManualNewsRefresh()" style="padding: 4px 10px; font-size: 0.75rem; cursor: pointer; border-radius: 6px;">
               🔄 Refresh Now
@@ -2653,7 +2650,7 @@ Conclude with median multiples and identify whether the target trades at a disco
       }).join('');
     }
 
-    function switchMarketCategory(category) {
+    function switchMarketCategory(category, isUserClick) {
       currentMarketCategory = category;
       var isSector = (category === 'sector');
 
@@ -2663,9 +2660,15 @@ Conclude with median multiples and identify whether the target trades at a disco
         var btn = document.getElementById('tab-' + cat);
         if (btn) {
           btn.className = (cat === category) ? 'news-tab-btn active' : 'news-tab-btn';
-          if (cat === category) {
+          if (cat === category && isUserClick) {
             try {
-              btn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+              var wrap = btn.closest('.news-tabs-wrap');
+              if (wrap && typeof wrap.scrollTo === 'function') {
+                wrap.scrollTo({
+                  left: btn.offsetLeft - (wrap.clientWidth / 2) + (btn.clientWidth / 2),
+                  behavior: 'smooth'
+                });
+              }
             } catch (e) {}
           }
         }
@@ -2717,28 +2720,12 @@ Conclude with median multiples and identify whether the target trades at a disco
     }
 
     function triggerManualNewsRefresh() {
-      switchMarketCategory(currentMarketCategory);
-      newsCountdownSec = 45;
+      switchMarketCategory(currentMarketCategory, false);
       var btn = document.getElementById('btn-manual-refresh');
       if (btn) {
         btn.textContent = '✅ Refreshed!';
         setTimeout(function() { btn.textContent = '🔄 Refresh Now'; }, 1000);
       }
-    }
-
-    function startMarketNewsTicker() {
-      if (newsTimerInterval) clearInterval(newsTimerInterval);
-      newsCountdownSec = 45;
-      newsTimerInterval = setInterval(function() {
-        newsCountdownSec--;
-        var el = document.getElementById('news-countdown-sec');
-        if (el) el.textContent = newsCountdownSec;
-        
-        if (newsCountdownSec <= 0) {
-          switchMarketCategory(currentMarketCategory);
-          newsCountdownSec = 45;
-        }
-      }, 1000);
     }
 
     // ================= INITIALIZATION =================
@@ -2751,15 +2738,12 @@ Conclude with median multiples and identify whether the target trades at a disco
     fetchLiveBinanceData();
 
     // 3. Load initial Market Updates category (Indian Markets)
-    switchMarketCategory('india');
+    switchMarketCategory('india', false);
 
-    // 4. Start automatic news refresh countdown
-    startMarketNewsTicker();
-
-    // 5. High-Frequency 1-Second Live Market Data Tick Engine
+    // 4. High-Frequency 1-Second Live Market Data Tick Engine
     setInterval(simulateLiveMarketTicks, 1000); // 1-second live ticker updates with green/red flashes
 
-    // 6. Periodic public API synchronizations
+    // 5. Periodic public API synchronizations
     setInterval(fetchLiveBinanceData, 4000);   // Crypto every 4s
     setInterval(fetchLiveForexData, 30000);    // Forex every 30s
     setInterval(fetchLiveBullionData, 60000);  // Gold/Silver every 60s
