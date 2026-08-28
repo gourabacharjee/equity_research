@@ -1,0 +1,9 @@
+# Dependencies
+node_modules/
+package-lock.json.bak
+
+# Logs and environment
+*.log
+.env
+.DS_Store
+Thumbs.db

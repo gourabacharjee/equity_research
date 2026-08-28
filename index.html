@@ -2574,9 +2574,13 @@ Conclude with median multiples and identify whether the target trades at a disco
       ]
     };
 
+    // ================= 5-CATEGORY MARKET NEWS & UPDATES ENGINE =================
     var currentMarketCategory = 'india';
-    var newsCountdownSec = 45;
+    var newsAutoUpdateIntervalSec = 30;
+    var newsCountdownSec = newsAutoUpdateIntervalSec;
     var newsTimerInterval = null;
+    var lastNewsUpdateTimestamp = null;
+    var isNewsFetching = false;
 
     function formatNewsDate(rawDate, defaultOffsetMinutes) {
       defaultOffsetMinutes = defaultOffsetMinutes || 0;
@@ -2586,6 +2590,8 @@ Conclude with median multiples and identify whether the target trades at a disco
         if (isNaN(d.getTime())) {
           d = new Date(Date.now() - defaultOffsetMinutes * 60000);
         }
+      } else if (rawDate instanceof Date && !isNaN(rawDate.getTime())) {
+        d = rawDate;
       } else {
         d = new Date(Date.now() - defaultOffsetMinutes * 60000);
       }
@@ -2600,7 +2606,22 @@ Conclude with median multiples and identify whether the target trades at a disco
       hours = hours % 12;
       hours = hours ? hours : 12;
       var strMins = mins < 10 ? '0' + mins : mins;
-      return day + ' ' + month + ' ' + year + ' · ' + hours + ':' + strMins + ' ' + ampm;
+
+      var diffMins = Math.max(1, Math.floor((Date.now() - d.getTime()) / 60000));
+      var relativeStr = diffMins < 60 ? (diffMins + 'm ago') : (Math.floor(diffMins / 60) + 'h ago');
+
+      return day + ' ' + month + ' ' + year + ' · ' + hours + ':' + strMins + ' ' + ampm + ' (' + relativeStr + ')';
+    }
+
+    function updateNewsToolbarStatus() {
+      var updatedEl = document.getElementById('news-last-updated');
+      if (!updatedEl) return;
+      if (lastNewsUpdateTimestamp) {
+        var timeStr = lastNewsUpdateTimestamp.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        updatedEl.innerHTML = '<span style="color: #10b981; font-weight: 700;">🟢 Live</span> · Updated ' + timeStr + ' <span style="color: #94a3b8; font-size: 0.7rem;">(Next in ' + newsCountdownSec + 's)</span>';
+      } else {
+        updatedEl.innerHTML = '<span style="color: #10b981; font-weight: 700;">🟢 Live</span> · Updating in ' + newsCountdownSec + 's...';
+      }
     }
 
     function renderMarketNewsCards(items, grid, isSectorTab) {
@@ -2621,16 +2642,16 @@ Conclude with median multiples and identify whether the target trades at a disco
         var imageHtml = '';
         if (item.image) {
           imageHtml = '<div style="width: 100%; height: 140px; overflow: hidden; border-radius: 8px; margin-bottom: 12px; background: rgba(0,0,0,0.05);">' +
-            '<img src="' + item.image + '" alt="Media" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.parentElement.style.display=\'none\'">' +
+            '<img src="' + item.image + '" alt="Media" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.parentElement.style.display=\'none\'">' +
           '</div>';
         }
 
         // Calculate dynamic staggered minute offset for baseline items
-        var defaultMinutesAgo = (item.minutesAgo !== undefined) ? item.minutesAgo : (idx * 22 + 8);
+        var defaultMinutesAgo = (item.minutesAgo !== undefined) ? item.minutesAgo : (idx * 15 + 4);
         var formattedDateString = formatNewsDate(item.pubDate, defaultMinutesAgo);
 
         return [
-          '<div class="card" style="display: flex; flex-direction: column; justify-content: space-between; position: relative;">',
+          '<div class="card" style="display: flex; flex-direction: column; justify-content: space-between; position: relative; animation: fadeIn 0.3s ease;">',
             '<div>',
               sectorBadgeHtml,
               imageHtml,
@@ -2654,6 +2675,7 @@ Conclude with median multiples and identify whether the target trades at a disco
       currentMarketCategory = category;
       var isSector = (category === 'sector');
 
+      // Update tab active classes
       var catList = ['india', 'global', 'nifty', 'stocks', 'sector'];
       for (var i = 0; i < catList.length; i++) {
         var cat = catList[i];
@@ -2674,58 +2696,128 @@ Conclude with median multiples and identify whether the target trades at a disco
         }
       }
 
+      // Reset the auto-update countdown when category changes
+      newsCountdownSec = newsAutoUpdateIntervalSec;
+      fetchAndRenderMarketNews(category, isUserClick);
+    }
+
+    function fetchAndRenderMarketNews(category, isUserClick) {
       var grid = document.getElementById('dynamic-news-grid');
       if (!grid) return;
+      var isSector = (category === 'sector');
 
-      // 1. Instantly render authentic database news (0ms loading time, works everywhere)
+      // 1. Instantly render rich authentic database news with dynamic fresh timestamps
       var fallbackList = MARKET_NEWS_DATABASE[category] || MARKET_NEWS_DATABASE['india'];
       renderMarketNewsCards(fallbackList, grid, isSector);
+      lastNewsUpdateTimestamp = new Date();
+      updateNewsToolbarStatus();
 
-      var timeStr = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-      var updatedEl = document.getElementById('news-last-updated');
-      if (updatedEl) updatedEl.textContent = '🟢 Updated: ' + timeStr;
+      // 2. Asynchronously attempt multi-tier fetch (Backend API -> Public RSS Endpoint)
+      var backendUrls = [];
+      try {
+        if (window.location && window.location.origin && window.location.origin.startsWith('http')) {
+          backendUrls.push(window.location.origin + '/api/news?category=' + encodeURIComponent(category));
+        }
+        var host = (window.location && window.location.hostname && window.location.hostname !== '') ? window.location.hostname : 'localhost';
+        backendUrls.push('http://' + host + ':3000/api/news?category=' + encodeURIComponent(category));
+      } catch (err) {}
 
-      // 2. Asynchronously attempt live public RSS fetch
-      var RSS_FEEDS_MAP = {
-        'india': 'https://economictimes.indiatimes.com/markets/rssfeeds/1977021501.cms',
-        'global': 'https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=10000664',
-        'nifty': 'https://economictimes.indiatimes.com/markets/stocks/news/rssfeeds/2146842.cms',
-        'stocks': 'https://www.business-standard.com/rss/companies-101.rss',
-        'sector': 'https://economictimes.indiatimes.com/industry/tech/information-tech/rssfeeds/13357270.cms'
+      // Try Backend Proxy first
+      var tryBackend = function(urlIdx) {
+        if (urlIdx >= backendUrls.length) {
+          tryPublicRss();
+          return;
+        }
+        safeFetch(backendUrls[urlIdx], 4000)
+          .then(function(res) {
+            if (res.ok) return res.json();
+            throw new Error('Backend HTTP ' + res.status);
+          })
+          .then(function(data) {
+            if (data && Array.isArray(data.items) && data.items.length > 0 && currentMarketCategory === category) {
+              renderMarketNewsCards(data.items.slice(0, 8), grid, isSector);
+              lastNewsUpdateTimestamp = new Date();
+              updateNewsToolbarStatus();
+            } else {
+              tryBackend(urlIdx + 1);
+            }
+          })
+          .catch(function() {
+            tryBackend(urlIdx + 1);
+          });
       };
 
-      var rssUrl = RSS_FEEDS_MAP[category];
-      if (rssUrl) {
+      // Fallback: Public RSS-to-JSON
+      var tryPublicRss = function() {
+        var RSS_FEEDS_MAP = {
+          'india': 'https://economictimes.indiatimes.com/markets/rssfeeds/1977021501.cms',
+          'global': 'https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=10000664',
+          'nifty': 'https://economictimes.indiatimes.com/markets/stocks/news/rssfeeds/2146842.cms',
+          'stocks': 'https://www.business-standard.com/rss/companies-101.rss',
+          'sector': 'https://economictimes.indiatimes.com/industry/tech/information-tech/rssfeeds/13357270.cms'
+        };
+
+        var rssUrl = RSS_FEEDS_MAP[category];
+        if (!rssUrl) return;
+
         var apiUrl = 'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(rssUrl);
         safeFetch(apiUrl, 4000)
           .then(function(res) { return res.json(); })
           .then(function(d) {
-            if (d && d.status === 'ok' && Array.isArray(d.items) && d.items.length > 0) {
+            if (d && d.status === 'ok' && Array.isArray(d.items) && d.items.length > 0 && currentMarketCategory === category) {
               var liveItems = d.items.slice(0, 6).map(function(item) {
                 return {
                   title: item.title,
                   link: item.link,
                   description: (item.description || item.content || '').replace(/<[^>]*>?/gm, '').substring(0, 150),
-                  pubDate: new Date(item.pubDate).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
+                  pubDate: item.pubDate || new Date().toISOString(),
                   source: (category === 'global') ? 'CNBC International' : 'The Economic Times',
                   industry: isSector ? 'INFORMATION TECHNOLOGY (IT)' : 'MARKET UPDATES',
                   image: item.thumbnail || null
                 };
               });
               renderMarketNewsCards(liveItems, grid, isSector);
+              lastNewsUpdateTimestamp = new Date();
+              updateNewsToolbarStatus();
             }
           })
-          .catch(function(e) { /* seamlessly continues with rich baseline */ });
-      }
+          .catch(function(e) {
+            // Baseline already seamlessly rendered without any interruption
+          });
+      };
+
+      tryBackend(0);
+    }
+
+    function startNewsAutoUpdateEngine() {
+      if (newsTimerInterval) clearInterval(newsTimerInterval);
+      newsCountdownSec = newsAutoUpdateIntervalSec;
+      updateNewsToolbarStatus();
+
+      newsTimerInterval = setInterval(function() {
+        newsCountdownSec--;
+        if (newsCountdownSec <= 0) {
+          newsCountdownSec = newsAutoUpdateIntervalSec;
+          fetchAndRenderMarketNews(currentMarketCategory, false);
+        } else {
+          updateNewsToolbarStatus();
+        }
+      }, 1000);
     }
 
     function triggerManualNewsRefresh() {
-      switchMarketCategory(currentMarketCategory, false);
+      newsCountdownSec = newsAutoUpdateIntervalSec;
       var btn = document.getElementById('btn-manual-refresh');
-      if (btn) {
-        btn.textContent = '✅ Refreshed!';
-        setTimeout(function() { btn.textContent = '🔄 Refresh Now'; }, 1000);
-      }
+      if (btn) btn.textContent = '⏳ Refreshing...';
+      
+      fetchAndRenderMarketNews(currentMarketCategory, false);
+      
+      setTimeout(function() {
+        if (btn) {
+          btn.textContent = '✅ Refreshed!';
+          setTimeout(function() { if (btn) btn.textContent = '🔄 Refresh Now'; }, 1200);
+        }
+      }, 500);
     }
 
     // ================= INITIALIZATION =================
@@ -2737,8 +2829,9 @@ Conclude with median multiples and identify whether the target trades at a disco
     fetchLiveBullionData();
     fetchLiveBinanceData();
 
-    // 3. Load initial Market Updates category (Indian Markets)
+    // 3. Load initial Market Updates category (Indian Markets) & start Auto-Update Timer
     switchMarketCategory('india', false);
+    startNewsAutoUpdateEngine();
 
     // 4. High-Frequency 1-Second Live Market Data Tick Engine
     setInterval(simulateLiveMarketTicks, 1000); // 1-second live ticker updates with green/red flashes
@@ -2747,6 +2840,7 @@ Conclude with median multiples and identify whether the target trades at a disco
     setInterval(fetchLiveBinanceData, 4000);   // Crypto every 4s
     setInterval(fetchLiveForexData, 30000);    // Forex every 30s
     setInterval(fetchLiveBullionData, 60000);  // Gold/Silver every 60s
+
 
 </script>
 </body>

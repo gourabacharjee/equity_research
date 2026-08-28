@@ -1,19 +1,31 @@
 const express = require('express');
 const cors = require('cors');
 const yahooFinance = require('yahoo-finance2').default;
+try {
+    if (yahooFinance && typeof yahooFinance.suppressNotices === 'function') {
+        yahooFinance.suppressNotices(['yahooSurvey', 'v2-deprecated']);
+    }
+} catch (e) {}
 const Parser = require('rss-parser');
+
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// RSS Parser setup with custom fields for thumbnail extraction
+// RSS Parser setup with custom fields for thumbnail extraction and timeout
 const parser = new Parser({
+    timeout: 6000,
+    headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    },
     customFields: {
         item: ['media:content', 'enclosure', 'image', 'media:thumbnail']
     }
 });
 
 app.use(cors());
+app.use(express.static(__dirname));
+
 
 // ================= TICKER API (2-Second Cache) =================
 const symbolMap = {
