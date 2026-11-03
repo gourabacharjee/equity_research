@@ -1337,7 +1337,7 @@
             <button class="news-tab-btn active" onclick="switchMarketCategory('india', true)" id="tab-india">🇮🇳 Indian Market News</button>
             <button class="news-tab-btn" onclick="switchMarketCategory('global', true)" id="tab-global">🌐 Global Market News</button>
             <button class="news-tab-btn" onclick="switchMarketCategory('nifty', true)" id="tab-nifty">📊 Nifty & Sensex Updates</button>
-            <button class="news-tab-btn" onclick="switchMarketCategory('stocks', true)" id="tab-stocks">🏢 Stock-Specific News</button>
+            <button class="news-tab-btn" onclick="switchMarketCategory('stocks', true)" id="tab-stocks">🏢 Indian Stock-Specific News</button>
             <button class="news-tab-btn" onclick="switchMarketCategory('sector', true)" id="tab-sector">⚡ Sector News</button>
           </div>
 
@@ -2474,52 +2474,52 @@ Conclude with median multiples and identify whether the target trades at a disco
       ],
       "stocks": [
         {
-          title: "Tata Motors announces strategic global expansion in commercial and electric vehicle platforms",
+          title: "Tata Motors rallies 3.4% on NSE and BSE on strong domestic passenger vehicle and commercial demand across Indian markets",
           link: "https://economictimes.indiatimes.com/markets/stocks/news",
-          description: "Shares advanced 2.8% after the automotive leader unveiled new modular EV architectures and announced new export supply agreements for European markets.",
+          description: "Shares surged on the Indian exchanges as Tata Motors clocked record domestic monthly vehicle dispatches, with Indian institutional funds accumulating shares on Dalal Street.",
           pubDate: "18 mins ago",
           source: "The Economic Times",
-          industry: "AUTOMOBILE"
+          industry: "INDIAN STOCKS · AUTOMOBILE (NSE: TATAMOTORS)"
         },
         {
-          title: "Infosys signs multi-year $1.2 Billion enterprise digital transformation agreement with Fortune 500 client",
+          title: "Infosys gains on Dalal Street as Indian IT bellwether secures massive domestic banking digitization contract",
           link: "https://www.business-standard.com/companies",
-          description: "The IT services giant secured a landmark cloud modernization and generative AI integration contract, significantly boosting long-term revenue visibility.",
+          description: "The Indian IT major witnessed brisk buying on NSE and BSE following a multi-year digital transformation and core banking modernization deal with premier Indian financial institutions.",
           pubDate: "40 mins ago",
           source: "Business Standard",
-          industry: "INFORMATION TECHNOLOGY"
+          industry: "INDIAN STOCKS · IT SERVICES (NSE: INFY)"
         },
         {
-          title: "HDFC Bank reports 17% YoY credit growth and record low gross NPA metrics for quarterly period",
+          title: "HDFC Bank powers Nifty Bank rally with 17% YoY domestic credit expansion and record low gross NPA on NSE and BSE",
           link: "https://economictimes.indiatimes.com/markets/stocks/news",
-          description: "The premier private lender delivered strong operational performance with healthy retail loan expansion and expanding low-cost CASA deposit ratios.",
+          description: "India's largest private lender led benchmark gains on Dalal Street as robust Indian retail loan growth and healthy domestic CASA deposit additions boosted market sentiment.",
           pubDate: "1 hour ago",
           source: "The Economic Times",
-          industry: "BANKING & FINANCE"
+          industry: "INDIAN STOCKS · BANKING (NSE: HDFCBANK)"
         },
         {
-          title: "Reliance Industries unveils mega investments in green hydrogen and renewable energy infrastructure",
+          title: "Reliance Industries drives Sensex higher on ₹75,000 Cr domestic clean energy and 5G expansion in Indian market",
           link: "https://www.business-standard.com/companies",
-          description: "Conglomerate shares climbed 1.9% following detailed project milestones for solar giga-factories and clean energy electrolyzer manufacturing facilities.",
+          description: "Conglomerate shares climbed 2.1% on the National Stock Exchange of India after management outlined major domestic solar manufacturing expansion across Indian facilities.",
           pubDate: "2 hours ago",
           source: "Business Standard",
-          industry: "CONGLOMERATE"
+          industry: "INDIAN STOCKS · CONGLOMERATE (NSE: RELIANCE)"
         },
         {
-          title: "Larsen & Toubro bags massive ₹4,500 Cr infrastructure order for high-speed rail and bridge corridors",
+          title: "Larsen & Toubro touches new 52-week high on NSE/BSE after securing ₹4,500 Cr Indian Railways infrastructure order",
           link: "https://economictimes.indiatimes.com/markets/stocks/news",
-          description: "Engineering and construction major expanded its total order book to all-time highs following key contract awards from public sector transport agencies.",
+          description: "Engineering heavyweight expanded its domestic order book to record highs as Indian government infrastructure spending accelerated across national railway and express highway projects.",
           pubDate: "3 hours ago",
           source: "The Economic Times",
-          industry: "INFRASTRUCTURE"
+          industry: "INDIAN STOCKS · INFRASTRUCTURE (NSE: LT)"
         },
         {
-          title: "Sun Pharma receives key regulatory approvals for novel dermatology and specialty therapeutics",
-          link: "https://www.business-standard.com/companies",
-          description: "Pharmaceutical major gained 2.1% as USFDA approved its key specialty medication line, opening lucrative commercial distribution channels.",
+          title: "State Bank of India (SBIN) advances on Dalal Street as domestic credit quality and net interest income hit historic highs",
+          link: "https://economictimes.indiatimes.com/markets/stocks/news",
+          description: "India's premier public sector lender traded firmly higher on NSE and BSE supported by expanding Indian retail loan books, strong domestic margins, and heavy institutional buying.",
           pubDate: "4 hours ago",
-          source: "Business Standard",
-          industry: "PHARMACEUTICALS"
+          source: "The Economic Times",
+          industry: "INDIAN STOCKS · PSU BANK (NSE: SBIN)"
         }
       ],
       "sector": [
@@ -2634,8 +2634,17 @@ Conclude with median multiples and identify whether the target trades at a disco
       grid.innerHTML = items.map(function(item, idx) {
         var sectorBadgeHtml = '';
         if (isSectorTab || item.industry) {
+          var badgeText = item.industry || 'MARKET SECTOR';
+          var badgeDisplay = '';
+          if (badgeText.indexOf('INDIAN') !== -1 || badgeText.indexOf('NSE') !== -1 || badgeText.indexOf('BSE') !== -1) {
+            badgeDisplay = '🇮🇳 ' + badgeText;
+          } else if (isSectorTab) {
+            badgeDisplay = '🏷️ SECTOR: ' + badgeText;
+          } else {
+            badgeDisplay = '📌 ' + badgeText;
+          }
           sectorBadgeHtml = '<div style="margin-bottom: 10px;">' +
-            '<span class="sector-badge-pill">🏷️ SECTOR: ' + (item.industry || 'MARKET SECTOR') + '</span>' +
+            '<span class="sector-badge-pill">' + badgeDisplay + '</span>' +
           '</div>';
         }
 
@@ -2765,18 +2774,29 @@ Conclude with median multiples and identify whether the target trades at a disco
           .then(function(res) { return res.json(); })
           .then(function(d) {
             if (d && d.status === 'ok' && Array.isArray(d.items) && d.items.length > 0 && currentMarketCategory === category) {
-              var liveItems = d.items.slice(0, 6).map(function(item) {
+              var liveItems = d.items.map(function(item) {
+                var defaultSource = (category === 'global') ? 'CNBC International' : (category === 'stocks' ? 'Business Standard' : 'The Economic Times');
+                var defaultIndustry = isSector ? 'INFORMATION TECHNOLOGY (IT)' : (category === 'stocks' ? 'INDIAN STOCKS (NSE/BSE)' : 'MARKET UPDATES');
                 return {
                   title: item.title,
                   link: item.link,
                   description: (item.description || item.content || '').replace(/<[^>]*>?/gm, '').substring(0, 150),
                   pubDate: item.pubDate || new Date().toISOString(),
-                  source: (category === 'global') ? 'CNBC International' : 'The Economic Times',
-                  industry: isSector ? 'INFORMATION TECHNOLOGY (IT)' : 'MARKET UPDATES',
+                  source: defaultSource,
+                  industry: defaultIndustry,
                   image: item.thumbnail || null
                 };
               });
-              renderMarketNewsCards(liveItems, grid, isSector);
+
+              // Filter out global market references when under Indian Stock-Specific news
+              if (category === 'stocks') {
+                var globalFilterRegex = /\b(wall street|dow jones|nasdaq|s&p 500|us markets|european markets|tokyo|nikkei|hang seng|ftse|dax|federal reserve|fed rate|us stocks|global markets|overseas)\b/i;
+                liveItems = liveItems.filter(function(item) {
+                  return !globalFilterRegex.test((item.title + ' ' + item.description).toLowerCase());
+                });
+              }
+
+              renderMarketNewsCards(liveItems.slice(0, 8), grid, isSector);
               lastNewsUpdateTimestamp = new Date();
               updateNewsToolbarStatus();
             }

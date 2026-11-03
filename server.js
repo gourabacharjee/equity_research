@@ -163,13 +163,19 @@ app.get('/api/news', async (req, res) => {
                     description: (item.contentSnippet || item.content || '').replace(/<[^>]*>?/gm, '').substring(0, 140),
                     pubDate: item.pubDate || new Date().toISOString(),
                     source: feed.source,
-                    industry: feed.industry || 'MARKET UPDATES',
+                    industry: feed.industry || (category === 'stocks' ? 'INDIAN STOCKS (NSE/BSE)' : 'MARKET UPDATES'),
                     image: extractImage(item)
                 }));
                 allNews = allNews.concat(items);
             } catch (e) {
                 console.error('Failed to parse feed:', feed.url, e.message);
             }
+        }
+        
+        // Filter out global market news when under Indian stock-specific news
+        if (category === 'stocks') {
+            const globalFilterRegex = /\b(wall street|dow jones|nasdaq|s&p 500|us markets|european markets|tokyo|nikkei|hang seng|ftse|dax|federal reserve|fed rate|us stocks|global markets|overseas)\b/i;
+            allNews = allNews.filter(item => !globalFilterRegex.test((item.title + ' ' + item.description).toLowerCase()));
         }
         
         // Deduplicate headlines
